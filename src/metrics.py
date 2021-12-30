@@ -1,10 +1,3 @@
-import torch
-import torchvision
-
-import pandas as pd
-import numpy as np
-
-
 def jaccard(y_true, y_pred):
     """ Jaccard a.k.a IoU score for batch of images
     """

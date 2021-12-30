@@ -1,9 +1,6 @@
 import torch
 import torchvision
 
-import pandas as pd
-import numpy as np
-
 
 class Block(torch.nn.Module):
     def __init__(self, in_channels, mid_channel, out_channels, batch_norm=False):
@@ -21,12 +18,12 @@ class Block(torch.nn.Module):
         x = self.conv1(x)
         if self.batch_norm:
             x = self.bn1(x)
-        x = torch.nn.functional.relu(x, inplace=True)
+        x = torch.nn.ReLU(inplace=True)(x)
         
         x = self.conv2(x)
         if self.batch_norm:
             x = self.bn2(x)
-        out = torch.nn.functional.relu(x, inplace=True)
+        out = torch.nn.ReLU(inplace=True)(x)
         return out
     
 
@@ -35,7 +32,7 @@ class UNet(torch.nn.Module):
         return torch.nn.functional.interpolate(x, size=size, mode=self.upscale_mode)
     
     def down(self, x):
-        return torch.nn.functional.max_pool2d(x, kernel_size=2)
+        return torch.nn.MaxPool2d(kernel_size=2)(x)
     
     def __init__(self, in_channels, out_channels, batch_norm=False, upscale_mode="nearest"):
         super().__init__()
@@ -82,7 +79,7 @@ class PretrainedUNet(torch.nn.Module):
         return torch.nn.functional.interpolate(x, size=size, mode=self.upscale_mode)
     
     def down(self, x):
-        return torch.nn.functional.max_pool2d(x, kernel_size=2)
+        return torch.nn.MaxPool2d(kernel_size=2)(x)
     
     def __init__(self, in_channels, out_channels, batch_norm=False, upscale_mode="nearest"):
         super().__init__()
@@ -115,16 +112,16 @@ class PretrainedUNet(torch.nn.Module):
         self.out = torch.nn.Conv2d(in_channels=32, out_channels=out_channels, kernel_size=1)
 
     def forward(self, x):  
-        init_conv = torch.nn.functional.relu(self.init_conv(x), inplace=True)
+        init_conv = torch.nn.ReLU(inplace=True)(self.init_conv(x))
 
-        enc1 = torch.nn.functional.relu(self.conv1(init_conv), inplace=True)
-        enc2 = torch.nn.functional.relu(self.conv2(self.down(enc1)), inplace=True)
-        enc3 = torch.nn.functional.relu(self.conv3(self.down(enc2)), inplace=True)
-        enc3 = torch.nn.functional.relu(self.conv3s(enc3), inplace=True)
-        enc4 = torch.nn.functional.relu(self.conv4(self.down(enc3)), inplace=True)
-        enc4 = torch.nn.functional.relu(self.conv4s(enc4), inplace=True)
-        enc5 = torch.nn.functional.relu(self.conv5(self.down(enc4)), inplace=True)
-        enc5 = torch.nn.functional.relu(self.conv5s(enc5), inplace=True)
+        enc1 = torch.nn.ReLU(inplace=True)(self.conv1(init_conv))
+        enc2 = torch.nn.ReLU(inplace=True)(self.conv2(self.down(enc1)))
+        enc3 = torch.nn.ReLU(inplace=True)(self.conv3(self.down(enc2)))
+        enc3 = torch.nn.ReLU(inplace=True)(self.conv3s(enc3))
+        enc4 = torch.nn.ReLU(inplace=True)(self.conv4(self.down(enc3)))
+        enc4 = torch.nn.ReLU(inplace=True)(self.conv4s(enc4))
+        enc5 = torch.nn.ReLU(inplace=True)(self.conv5(self.down(enc4)))
+        enc5 = torch.nn.ReLU(inplace=True)(self.conv5s(enc5))
         
         center = self.center(self.down(enc5))
         
